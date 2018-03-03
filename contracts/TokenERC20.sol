@@ -97,7 +97,7 @@ contract TokenERC20 {
         }
     }
 
-    function burn(uint256 _value) public returns (bool success) {
+    function burn(uint256 _value) onlyOwner public returns (bool success) {
         require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough
         balanceOf[msg.sender] -= _value;            // Subtract from the sender
         totalSupply -= _value;                      // Updates totalSupply
@@ -106,7 +106,7 @@ contract TokenERC20 {
     }
 
 
-    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+    function burnFrom(address _from, uint256 _value) onlyOwner public returns (bool success) {
         require(balanceOf[_from] >= _value);                // Check if the targeted balance is enough
         require(_value <= allowance[_from][msg.sender]);    // Check allowance
         balanceOf[_from] -= _value;                         // Subtract from the targeted balance
@@ -115,6 +115,34 @@ contract TokenERC20 {
         Burn(_from, _value);
         return true;
     }
+
+
+  function transfer(address _to, uint256 _value, bytes _data) public returns (bool) {
+    require(_to != address(this));
+    transfer(_to, _value);
+    require(_to.call(_data));
+    return true;
+  }
+
+  function transferFrom(address _from, address _to, uint256 _value, bytes _data) public returns (bool) {
+    require(_to != address(this));
+
+    transferFrom(_from, _to, _value);
+
+    require(_to.call(_data));
+    return true;
+  }
+
+  function approve(address _spender, uint256 _value, bytes _data) public returns (bool) {
+    require(_spender != address(this));
+
+    approve(_spender, _value);
+
+    require(_spender.call(_data));
+
+    return true;
+  }
+
     
     function transferOwnership(address _owner) onlyOwner public {
         owner = _owner;
